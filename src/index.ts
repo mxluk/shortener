@@ -3,22 +3,25 @@ import shortenUrl from './utils.ts';
 async function handlePlusUrl(path: string, request: Request, env: Env): Promise<Response> {
 	const [hash, url] = path.split('+');
 
-	if (!URL.canParse(url)) {
+	// Use full URL with query params and fragment
+	const fullUrl = new URL(url, request.url).href;
+
+	if (!URL.canParse(fullUrl)) {
 		return new Response('Error: Invalid URL', { status: 400 });
 	}
 
-	if (new URL(url).hostname === new URL(request.url).hostname) {
+	if (new URL(fullUrl).hostname === new URL(request.url).hostname) {
 		return new Response('Error: Cannot shorten URLs from the same domain', { status: 400 });
 	}
 
 	const value = await env.KV.get(hash);
 
 	if (value === null) {
-		console.log(`Storing ${hash} -> ${url}`);
-		await env.KV.put(hash, url);
+		console.log(`Storing ${hash} -> ${fullUrl}`);
+		await env.KV.put(hash, fullUrl);
 		return new Response(hash);
 	} else {
-		if (value === url) {
+		if (value === fullUrl) {
 			return new Response(hash);
 		} else {
 			return new Response(`URL ${value} already exists for hash ${hash}`);
@@ -27,19 +30,21 @@ async function handlePlusUrl(path: string, request: Request, env: Env): Promise<
 }
 
 async function handleHashing(path: string, request: Request, env: Env): Promise<Response> {
-	if (new URL(path, request.url).hostname === new URL(request.url).hostname) {
+	const fullUrl = new URL(path, request.url).href;
+
+	if (new URL(fullUrl).hostname === new URL(request.url).hostname) {
 		return new Response('Error: Cannot shorten URLs from the same domain', { status: 400 });
 	}
 
 	for (let offset = 0; offset < 10; offset++) {
-		const hash = shortenUrl(path, offset);
+		const hash = shortenUrl(fullUrl, offset);
 		const value = await env.KV.get(hash);
 		if (value === null) {
-			console.log(`Storing ${hash} -> ${path}`);
-			await env.KV.put(hash, path);
+			console.log(`Storing ${hash} -> ${fullUrl}`);
+			await env.KV.put(hash, fullUrl);
 			return new Response(hash);
 		} else {
-			if (value === path) {
+			if (value === fullUrl) {
 				return new Response(hash);
 			}
 		}
@@ -59,16 +64,16 @@ async function handleRedirect(path: string, env: Env): Promise<Response> {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const fullURL = new URL(request.url);
-		const path = fullURL.pathname.slice(1);
+		const fullPath = fullURL.href.split(fullURL.origin)[1].slice(1); // Get path + query + fragment
 
-		if (!URL.canParse(path)) {
-			return handleRedirect(path, env);
+		if (!URL.canParse(fullPath)) {
+			return handleRedirect(fullPath, env);
 		}
 
-		if (path.includes('+http://') || path.includes('+https://')) {
-			return handlePlusUrl(path, request, env);
+		if (fullPath.includes('+http://') || fullPath.includes('+https://')) {
+			return handlePlusUrl(fullPath, request, env);
 		} else {
-			return handleHashing(path, request, env);
+			return handleHashing(fullPath, request, env);
 		}
 	},
 } satisfies ExportedHandler<Env>;
