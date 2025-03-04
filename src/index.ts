@@ -1,7 +1,16 @@
 import shortenUrl from './utils.ts';
 
-async function handlePlusUrl(path: string, env: Env): Promise<Response> {
+async function handlePlusUrl(path: string, request: Request, env: Env): Promise<Response> {
 	const [hash, url] = path.split('+');
+
+	if (!URL.canParse(url)) {
+		return new Response('Error: Invalid URL', { status: 400 });
+	}
+
+	if (new URL(url).hostname === new URL(request.url).hostname) {
+		return new Response('Error: Cannot shorten URLs from the same domain', { status: 400 });
+	}
+
 	const value = await env.KV.get(hash);
 
 	if (value === null) {
@@ -17,7 +26,11 @@ async function handlePlusUrl(path: string, env: Env): Promise<Response> {
 	}
 }
 
-async function handleHashing(path: string, env: Env): Promise<Response> {
+async function handleHashing(path: string, request: Request, env: Env): Promise<Response> {
+	if (new URL(path, request.url).hostname === new URL(request.url).hostname) {
+		return new Response('Error: Cannot shorten URLs from the same domain', { status: 400 });
+	}
+
 	for (let offset = 0; offset < 10; offset++) {
 		const hash = shortenUrl(path, offset);
 		const value = await env.KV.get(hash);
@@ -53,9 +66,9 @@ export default {
 		}
 
 		if (path.includes('+http://') || path.includes('+https://')) {
-			return handlePlusUrl(path, env);
+			return handlePlusUrl(path, request, env);
 		} else {
-			return handleHashing(path, env);
+			return handleHashing(path, request, env);
 		}
 	},
 } satisfies ExportedHandler<Env>;
