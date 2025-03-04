@@ -10,6 +10,10 @@
 	"observability": {
 		"enabled": true
 	},
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
 	"kv_namespaces": [
 		{
 			"binding": "KV",

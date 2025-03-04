@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+				content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>fuc.moe shortener</title>
+	<style>
+		html, body {
+			height: 100%;
+			width: 100%;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		main {
+			height: 250px;
+			padding: 0 100px;
+			border: 1px solid #000;
+			border-radius: 10px;
+			box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2);
+		}
+		form, #resultcontainer {
+			height: 50%;
+		}
+		form {
+			display: flex;
+			align-items: end;
+			padding-bottom: 2em;
+		}
+		#resultcontainer {
+			display: flex;
+			justify-content: start;
+			flex-direction: column;
+		}
+		#resultcontainer button {
+			margin-top: 1em;
+		}
+		* {
+			box-sizing: border-box;
+		}
+		.hidden {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+<main>
+	<form action="javascript:submitForm()">
+		<input type="text" name="url" id="url" placeholder="URL" autofocus>
+		<input type="submit" value="Shorten">
+	</form>
+	<div id="resultcontainer">
+		<div id="result"></div>
+		<button onclick="copyToClipboard()" class="hidden">Copy</button>
+	</div>
+</main>
+
+
+<script src="jquery-3.7.1.min.js"></script>
+<script>
+	function submitForm() {
+		const url = $('#url').val();
+
+		if(!url || !URL.canParse(url)) {
+			alert('Invalid URL');
+			return;
+		}
+
+		$.get('/' + url, function(data) {
+			const fullUrl = window.location.protocol + '//' + window.location.host + '/' + data;
+			const anchorTag = `<a href="${fullUrl}" target="_blank">${fullUrl}</a>`;
+			$('#result').html(anchorTag);
+			$('#resultcontainer button').removeClass('hidden');
+		});
+	}
+
+	function copyToClipboard() {
+		navigator.clipboard.writeText($('#result').text());
+		$('#resultcontainer button').text('✅');
+	}
+</script>
+</body>
+</html>
