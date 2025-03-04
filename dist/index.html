@@ -69,11 +69,18 @@
 			return;
 		}
 
-		$.get('/' + url, function(data) {
-			const fullUrl = window.location.protocol + '//' + window.location.host + '/' + data;
-			const anchorTag = `<a href="${fullUrl}" target="_blank">${fullUrl}</a>`;
-			$('#result').html(anchorTag);
-			$('#resultcontainer button').removeClass('hidden');
+		$.ajax({
+			url: '/' +url,
+			type: 'GET',
+			success: function(data) {
+				const fullUrl = window.location.protocol + '//' + window.location.host + '/' + data;
+				const anchorTag = `<a href="${fullUrl}" target="_blank">${fullUrl}</a>`;
+				$('#result').html(anchorTag);
+				$('#resultcontainer button').removeClass('hidden');
+			},
+			error: function(err) {
+				alert(err.responseText);
+			}
 		});
 	}
 
