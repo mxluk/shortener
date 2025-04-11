@@ -49,7 +49,7 @@ async function handleHashing(path: string, request: Request, env: Env): Promise<
 			}
 		}
 	}
-	return new Response('Error: Collision');
+	return new Response('Error: Collision', { status: 500 });
 }
 
 async function handleRedirect(path: string, env: Env): Promise<Response> {

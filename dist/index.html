@@ -5,6 +5,9 @@
 	<meta name="viewport"
 				content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 	<title>fuc.moe shortener</title>
 	<style>
 		html, body {
@@ -14,10 +17,10 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			font-family: 'Open Sans', sans-serif;
 		}
 		main {
-			height: 250px;
-			padding: 0 100px;
+			padding: 50px 100px;
 			border: 1px solid #000;
 			border-radius: 10px;
 			box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2);
@@ -25,7 +28,7 @@
 		form, #resultcontainer {
 			height: 50%;
 		}
-		form {
+		form div {
 			display: flex;
 			align-items: end;
 			padding-bottom: 2em;
@@ -34,6 +37,7 @@
 			display: flex;
 			justify-content: start;
 			flex-direction: column;
+			height: 90px;
 		}
 		#resultcontainer button {
 			margin-top: 1em;
@@ -44,13 +48,21 @@
 		.hidden {
 			display: none;
 		}
+		h2 span {
+			color: #00f;
+		}
 	</style>
 </head>
 <body>
 <main>
+	<h1>fuc.moe URL Shortener</h1>
+	<h2><span>FUC</span>king shorten <span>MO</span>r<span>E</span> urls</h2>
 	<form action="javascript:submitForm()">
-		<input type="text" name="url" id="url" placeholder="URL" autofocus>
-		<input type="submit" value="Shorten">
+		<input type="text" name="slug" id="slug" placeholder="Custom slug (optional)" size="15">
+		<div>
+			<input type="text" name="url" id="url" placeholder="https://example.com" autofocus size="25">
+			<input type="submit" value="Shorten">
+		</div>
 	</form>
 	<div id="resultcontainer">
 		<div id="result"></div>
@@ -62,15 +74,18 @@
 <script src="jquery-3.7.1.min.js"></script>
 <script>
 	function submitForm() {
-		const url = $('#url').val();
+		const url = $('#url').val().trim();
+		const slug = $('#slug').val().trim();
 
-		if(!url || !URL.canParse(url)) {
+		if (!url || !URL.canParse(url)) {
 			alert('Invalid URL');
 			return;
 		}
 
+		const requestPath = slug ? `${slug}+${url}` : url;
+
 		$.ajax({
-			url: '/' +url,
+			url: '/' + requestPath,
 			type: 'GET',
 			success: function(data) {
 				const fullUrl = window.location.protocol + '//' + window.location.host + '/' + data;
@@ -83,7 +98,6 @@
 			}
 		});
 	}
-
 	function copyToClipboard() {
 		navigator.clipboard.writeText($('#result').text());
 		$('#resultcontainer button').text('✅');
