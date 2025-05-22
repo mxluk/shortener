@@ -131,7 +131,6 @@ out
 # vuepress v2.x temp and cache directory
 
 .temp
-.cache
 
 # Docusaurus cache and generated files
 
@@ -172,3 +171,26 @@ out
 
 .dev.vars
 .wrangler/
+# Existing ignores...
+.DS_Store
+*.log
+
+# Wrangler / Cloudflare
+wrangler-dist/ # If you have a custom build output for wrangler separate from assets
+
+# Build output for static assets (Astro)
+# Only ignore 'dist' if you build it as part of your CI/CD pipeline
+# If you commit 'dist', then remove this line or adjust.
+/dist/
+
+# Astro specific
+/astro/dist/      # Astro's internal build dir if not configured to root dist (but we did)
+/astro/.astro/    # Astro's cache and dev build artifacts
+/astro/src/env.d.ts # Astro generated env types
+
+# IDE
+.idea/
+.vscode/
+
+# Test coverage
+coverage/

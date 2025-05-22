@@ -1,0 +1,109 @@
+---
+// src/components/ShortenerForm.astro
+// Props can be added if this component needs to communicate upwards
+export interface Props {
+	onSuccess?: (data: string) => void;
+	onError?: (errorMessage: string) => void;
+}
+const { onSuccess, onError } = Astro.props;
+---
+<form id="shortenerForm">
+	<input type="text" name="slug" id="slug" placeholder="Custom slug (optional)" size="15">
+	<div>
+		<input type="text" name="url" id="url" placeholder="https://example.com" autofocus size="25">
+		<input type="submit" value="Shorten">
+	</div>
+</form>
+
+<style>
+	form {
+		/* height: 50%; No longer needed as layout handles sizing */
+	}
+	form div {
+		display: flex;
+		align-items: end; /* Or flex-end */
+		padding-bottom: 2em;
+		gap: 0.5em; /* Add some space between inputs */
+	}
+	input[type="text"] {
+		padding: 0.5em;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+	}
+	input[type="submit"] {
+		padding: 0.5em 1em;
+		background-color: #007bff;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+	}
+	input[type="submit"]:hover {
+		background-color: #0056b3;
+	}
+</style>
+
+<script define:vars={{ onSuccessCallback: onSuccess, onErrorCallback: onError }}>
+	// Vanilla JS alternative to jQuery for modern browsers
+	// const $ = (selector) => document.querySelector(selector);
+	// const $$ = (selector) => document.querySelectorAll(selector);
+
+	function submitFormLocal(event) {
+		event.preventDefault(); // Prevent default form submission
+
+		// Using jQuery as it's already included
+		const url = $('#url').val().trim();
+		const slug = $('#slug').val().trim();
+
+		if (!url) {
+			alert('URL is required.');
+			if (onErrorCallback) onErrorCallback('URL is required.');
+			return;
+		}
+
+		try {
+			// Basic URL validation (can be more robust)
+			new URL(url); // This will throw if not a valid absolute URL
+		} catch (e) {
+			// Check if it's a relative path that could be valid for shortening
+			// (e.g. /somepath if your service allows it)
+			// For now, let's assume we need a full URL to shorten.
+			// Or use URL.canParse more carefully for the intended use case
+			if (!URL.canParse(url) && !url.startsWith('/')) { // Very basic check
+				alert('Invalid URL format.');
+				if (onErrorCallback) onErrorCallback('Invalid URL format.');
+				return;
+			}
+		}
+
+
+		const requestPath = slug ? `${slug}+${url}` : url;
+
+		$.ajax({
+			url: '/' + requestPath, // Assumes the API is at the root
+			type: 'GET', // Or POST if you change your worker
+			success: function(data) {
+				if (onSuccessCallback) {
+					onSuccessCallback(data);
+				} else {
+					// Fallback if no callback provided (though less ideal in component architecture)
+					console.log('Success (no callback):', data);
+				}
+			},
+			error: function(err) {
+				const errorMessage = err.responseText || 'An unknown error occurred.';
+				alert(errorMessage);
+				if (onErrorCallback) {
+					onErrorCallback(errorMessage);
+				}
+			}
+		});
+	}
+
+	// Attach event listener after DOM is ready, or directly if script is at end of component
+	$(document).ready(function() {
+		$('#shortenerForm').on('submit', submitFormLocal);
+	});
+	// Or without $(document).ready if script placement guarantees form exists
+	// document.getElementById('shortenerForm').addEventListener('submit', submitFormLocal);
+</script>

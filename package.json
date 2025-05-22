@@ -3,17 +3,26 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
+		"astro:dev": "astro dev --root ./astro",
+		"astro:build": "astro build --root ./astro",
+		"astro:preview": "astro preview --root ./astro",
+		"worker:dev": "wrangler dev src/index.ts",
+		"worker:deploy": "wrangler deploy src/index.ts",
+		"dev": "npm-run-all --parallel astro:dev worker:dev",
+		"build": "pnpm run astro:build",
+		"deploy": "npm-run-all --serial build worker:deploy",
+		"start": "pnpm run dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.6.4",
 		"@cloudflare/workers-types": "^4.20250303.0",
+		"astro": "^4.11.5",
+		"npm-run-all": "^4.1.5",
 		"typescript": "^5.5.2",
 		"vitest": "~2.1.9",
 		"wrangler": "^3.112.0"
-	}
+	},
+	"packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }

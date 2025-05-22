@@ -1,0 +1,15 @@
+/* src/styles/global.css */
+* {
+	box-sizing: border-box;
+}
+
+.hidden {
+	display: none !important; /* Use !important sparingly, or manage visibility via JS state */
+}
+
+/* You could also move font-family here if preferred over BaseLayout's style tag */
+/*
+body {
+	font-family: 'Open Sans', sans-serif;
+}
+*/

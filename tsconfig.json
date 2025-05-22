@@ -1,47 +1,63 @@
+// shortener/tsconfig.json
 {
 	"compilerOptions": {
-		/* Visit https://aka.ms/tsconfig.json to read more about this file */
-
 		/* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-		"target": "es2021",
+		"target": "es2021", // Retained from your original
 		/* Specify a set of bundled library declaration files that describe the target runtime environment. */
-		"lib": ["es2021"],
+		"lib": ["es2021"], // Retained
 		/* Specify what JSX code is generated. */
-		"jsx": "react-jsx",
+		"jsx": "react-jsx", // Retained - useful if you ever use JSX in worker utilities, otherwise less critical here
 
 		/* Specify what module code is generated. */
-		"module": "es2022",
+		"module": "es2022", // Retained
 		/* Specify how TypeScript looks up a file from a given module specifier. */
-		"moduleResolution": "Bundler",
+		"moduleResolution": "Bundler", // Retained - Good choice for modern projects
 		/* Specify type package names to be included without being referenced in a source file. */
 		"types": [
-			"@cloudflare/workers-types/2023-07-01"
+			"@cloudflare/workers-types" // Use the latest general workers-types, or pin if needed.
+			// The version "2023-07-01" is a specific compatibility date.
+			// Consider updating to a newer general version unless you have a reason for the specific date.
 		],
 		/* Enable importing .json files */
-		"resolveJsonModule": true,
+		"resolveJsonModule": true, // Retained
 
 		/* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */
-		"allowJs": true,
+		"allowJs": true, // Retained
 		/* Enable error reporting in type-checked JavaScript files. */
-		"checkJs": false,
+		"checkJs": false, // Retained
 
 		/* Disable emitting files from a compilation. */
-		"noEmit": true,
+		"noEmit": true, // Retained - Wrangler/esbuild handles the actual bundling and emitting
 
 		/* Ensure that each file can be safely transpiled without relying on other imports. */
-		"isolatedModules": true,
+		"isolatedModules": true, // Retained
 		/* Allow 'import x from y' when a module doesn't have a default export. */
-		"allowSyntheticDefaultImports": true,
-		"allowImportingTsExtensions": true,
+		"allowSyntheticDefaultImports": true, // Retained
+		"allowImportingTsExtensions": true, // Retained
+
 		/* Ensure that casing is correct in imports. */
-		"forceConsistentCasingInFileNames": true,
+		"forceConsistentCasingInFileNames": true, // Retained
 
 		/* Enable all strict type-checking options. */
-		"strict": true,
+		"strict": true, // Retained
 
 		/* Skip type checking all .d.ts files. */
-		"skipLibCheck": true
+		"skipLibCheck": true, // Retained
+
+		// Add base URL and paths if you plan to use them for worker code
+		// "baseUrl": "./",
+		// "paths": {
+		//   "@/*": ["src/*"]
+		// }
 	},
-	"exclude": ["test"],
-	"include": ["worker-configuration.d.ts", "src/**/*.ts"]
+	"include": [
+		"src/**/*.ts", // All .ts files in your worker's src directory
+		"worker-configuration.d.ts" // Your Cloudflare environment type definitions
+	],
+	"exclude": [
+		"node_modules",
+		"dist",        // Build output directory
+		"astro",       // The entire astro subdirectory
+		"test"         // Your test directory (often has its own tsconfig or setup)
+	]
 }

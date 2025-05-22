@@ -1,0 +1,102 @@
+---
+// src/components/ResultDisplay.astro
+export interface Props {
+	shortenedHash?: string | null; // The hash part from the server
+}
+const { shortenedHash } = Astro.props;
+
+let fullShortenedUrl = '';
+if (shortenedHash && typeof window !== 'undefined') { // Ensure window exists for client-side URL construction
+	fullShortenedUrl = `${window.location.protocol}//${window.location.host}/${shortenedHash}`;
+}
+---
+<div id="resultcontainer" class:list={{ 'visible': !!shortenedHash }}>
+	{shortenedHash && fullShortenedUrl && (
+		<>
+			<div id="result">
+				<a href={fullShortenedUrl} target="_blank" rel="noopener noreferrer">{fullShortenedUrl}</a>
+			</div>
+			<button id="copyButton">Copy</button>
+		</>
+	)}
+	{!shortenedHash && <div id="resultPlaceholder">Your shortened URL will appear here.</div>}
+</div>
+
+<style>
+	#resultcontainer {
+		display: flex;
+		justify-content: start;
+		flex-direction: column;
+		min-height: 90px; /* Use min-height to allow content to define actual height */
+		opacity: 0;
+		transition: opacity 0.3s ease-in-out;
+	}
+	#resultcontainer.visible {
+		opacity: 1;
+	}
+	#result {
+		margin-bottom: 1em; /* Space between link and button */
+		word-break: break-all; /* Prevent long URLs from breaking layout */
+	}
+	#result a {
+		color: #007bff;
+		text-decoration: none;
+	}
+	#result a:hover {
+		text-decoration: underline;
+	}
+	#resultPlaceholder {
+		color: #6c757d; /* Bootstrap's text-muted color */
+		font-style: italic;
+	}
+	button {
+		margin-top: auto; /* Pushes button to bottom if container has extra space */
+		padding: 0.5em 1em;
+		background-color: #28a745; /* Green for copy */
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		align-self: flex-start; /* Align button to the start */
+	}
+	button:hover {
+		background-color: #218838;
+	}
+</style>
+
+<script define:vars={{ initialShortenedHash: shortenedHash }}>
+	// const $ = (selector) => document.querySelector(selector); // if not using jQuery
+
+	function copyToClipboardLocal() {
+		const resultText = $('#result').text(); // Get text content of the anchor
+		if (resultText) {
+			navigator.clipboard.writeText(resultText).then(() => {
+				const button = $('#copyButton');
+				const originalText = button.text();
+				button.text('✅ Copied!');
+				setTimeout(() => {
+					button.text(originalText); // Reset after a delay
+				}, 2000);
+			}).catch(err => {
+				console.error('Failed to copy: ', err);
+				alert('Failed to copy to clipboard.');
+			});
+		}
+	}
+
+	// Only attach listener if the button exists (i.e., if a shortenedHash was provided)
+	// This script runs on the client, so we check initialShortenedHash.
+	// If the component re-renders with a new hash, this script might need to re-run or adapt.
+	// Astro's view transitions or custom event handling can manage this.
+	// For simplicity now, we'll rely on initial rendering.
+	if (initialShortenedHash) {
+		$(document).ready(function() { // Ensure DOM is ready
+			$('#copyButton').on('click', copyToClipboardLocal);
+		});
+	}
+
+	// If `shortenedHash` prop changes dynamically after initial load (e.g. via client-side routing or state update in parent),
+	// you might need to observe prop changes or use custom events to re-initialize the button and its listener,
+	// or to ensure the button is correctly added/removed from the DOM by Astro.
+	// For this example, we assume `shortenedHash` is primarily set on initial render or full page reload.
+</script>
