@@ -1,0 +1,63 @@
+---
+// src/pages/index.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import ShortenerForm from '../components/ShortenerForm.astro';
+import ResultDisplay from '../components/ResultDisplay.astro';
+
+// This script runs on the server during build, and potentially on the client if `client:visible` etc. is used.
+// For state that changes on client interaction, we need client-side script.
+let shortenedHashFromServer: string | null = null; // This would be for SSR, not applicable here for client-side form
+---
+<BaseLayout title="FUC.MOE - URL Shortener">
+	<PageHeader />
+	<ShortenerForm client:load onSuccess={(data) => {
+		// This runs on the client because ShortenerForm has client:load
+		// We need to update the ResultDisplay component or its props
+		// This requires a bit more advanced client-side state management or direct DOM manipulation
+		// For simplicity, let's find the ResultDisplay and update it.
+		// A more robust way would be to use Nano Stores or custom events.
+
+		const resultContainer = document.getElementById('resultcontainer');
+		const resultDiv = document.getElementById('result');
+		const copyButton = document.getElementById('copyButton'); // Assuming ID on button
+		const resultPlaceholder = document.getElementById('resultPlaceholder');
+
+		if (resultContainer && resultDiv && copyButton && resultPlaceholder) {
+			const fullUrl = `${window.location.protocol}//${window.location.host}/${data}`;
+			resultDiv.innerHTML = `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a>`;
+
+			resultPlaceholder.classList.add('hidden');
+			resultDiv.classList.remove('hidden');
+			copyButton.classList.remove('hidden');
+			copyButton.textContent = 'Copy'; // Reset button text
+			resultContainer.classList.add('visible');
+		}
+
+	}} onError={(errorMessage) => {
+		// Handle error display if needed beyond the alert in ShortenerForm
+		console.error("Form submission error:", errorMessage);
+		const resultContainer = document.getElementById('resultcontainer');
+		const resultDiv = document.getElementById('result');
+		const copyButton = document.getElementById('copyButton');
+		const resultPlaceholder = document.getElementById('resultPlaceholder');
+
+		if (resultContainer && resultDiv && copyButton && resultPlaceholder) {
+			resultPlaceholder.textContent = `Error: ${errorMessage}`;
+			resultPlaceholder.style.color = 'red';
+			resultPlaceholder.classList.remove('hidden');
+
+			resultDiv.innerHTML = ''; // Clear previous result
+			resultDiv.classList.add('hidden');
+			copyButton.classList.add('hidden');
+			resultContainer.classList.add('visible'); // Make container visible to show error
+		}
+	}} />
+	<ResultDisplay shortenedHash={null} /> {/* Initially no hash, JS in ShortenerForm callback will update DOM */}
+</BaseLayout>
+
+<script>
+	// Client-side script for index.astro, if needed for inter-component communication
+	// not managed by Astro's client directives directly.
+	// In this setup, the ShortenerForm's client:load script handles updating the ResultDisplay's content.
+</script>

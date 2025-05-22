@@ -1,0 +1,48 @@
+// shortener/astro/tsconfig.json
+{
+	"extends": "astro/tsconfigs/strict", // Or "astro/tsconfigs/base"
+	"compilerOptions": {
+		// --- Astro specific or common frontend settings ---
+		"jsx": "react-jsx", // Or "preserve" if you use React components directly
+		"jsxImportSource": "astro", // Or "react" if using React components
+		"baseUrl": ".", // Sets the base for path aliases to be 'shortener/astro/'
+		"paths": {
+			"@components/*": ["src/components/*"],
+			"@layouts/*": ["src/layouts/*"],
+			"@pages/*": ["src/pages/*"],
+			"@assets/*": ["src/assets/*"], // Example for assets within astro/src
+			"@public/*": ["public/*"]      // Example for assets in astro/public
+			// Add other aliases as needed
+		},
+		"moduleResolution": "Bundler", // Good modern choice, consistent with root
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"lib": ["ESNext", "DOM", "DOM.Iterable"], // Add DOM types for frontend code
+		"module": "ESNext",
+		"noEmit": true, // Astro handles its own emit
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ESNext",
+		// You can add "allowImportingTsExtensions": true here too if desired for Astro files
+
+		// --- Type checking for .astro files ---
+		// These are usually handled by the "extends" from astro/tsconfigs/*
+		// but good to be aware of if you were to customize heavily.
+	},
+	"include": [
+		"src/**/*.astro",
+		"src/**/*.ts",
+		"src/**/*.tsx", // If you use TSX components with an integration
+		"src/**/*.js",
+		"src/**/*.jsx",
+		"env.d.ts" // Astro's env.d.ts for global types
+	],
+	"exclude": [
+		"node_modules", // Excludes the root node_modules
+		"../../node_modules", // Explicitly exclude root node_modules
+		"../../dist" // Exclude the root dist output
+	]
+}
