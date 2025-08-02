@@ -28,17 +28,36 @@ describe('fuc.moe shortener with in-memory KV', () => {
 		expect(await mockKV.get(expectedHash)).toBe(url);
 	});
 
-	it('shortens with custom slug', async () => {
-		const slug = 'customslug';
-		const url = 'https://test.com/';
+        it('shortens with custom slug', async () => {
+                const slug = 'customslug';
+                const url = 'https://test.com/';
 
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(makeRequest(`${slug}+${url}`), env, ctx);
-		await waitOnExecutionContext(ctx);
+                const ctx = createExecutionContext();
+                const response = await worker.fetch(makeRequest(`${slug}+${url}`), env, ctx);
+                await waitOnExecutionContext(ctx);
 
-		expect(await response.text()).toBe(slug);
-		expect(await mockKV.get(slug)).toBe(url);
-	});
+                expect(await response.text()).toBe(slug);
+                expect(await mockKV.get(slug)).toBe(url);
+        });
+
+        it('handles URLs containing plus signs', async () => {
+                const slug = 'plus';
+                const url = 'https://example.com/search?q=a+b';
+
+                const ctx = createExecutionContext();
+                const response = await worker.fetch(makeRequest(`${slug}+${url}`), env, ctx);
+                await waitOnExecutionContext(ctx);
+
+                expect(await response.text()).toBe(slug);
+                expect(await mockKV.get(slug)).toBe(url);
+
+                const redirectCtx = createExecutionContext();
+                const redirectResp = await worker.fetch(makeRequest(slug), env, redirectCtx);
+                await waitOnExecutionContext(redirectCtx);
+
+                expect(redirectResp.status).toBe(301);
+                expect(redirectResp.headers.get('Location')).toBe(url);
+        });
 
 	it('redirects existing slug', async () => {
 		const slug = 'go';

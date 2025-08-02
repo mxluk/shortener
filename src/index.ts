@@ -1,10 +1,13 @@
 import shortenUrl from './utils.ts';
 
 async function handlePlusUrl(path: string, request: Request, env: Env): Promise<Response> {
-	const [hash, url] = path.split('+');
+        // Only split on the first '+' to preserve additional '+' characters in the URL
+        const plusIndex = path.indexOf('+');
+        const hash = path.slice(0, plusIndex);
+        const url = path.slice(plusIndex + 1);
 
-	// Use full URL with query params and fragment
-	const fullUrl = new URL(url, request.url).href;
+        // Use full URL with query params and fragment
+        const fullUrl = new URL(url, request.url).href;
 
 	if (!URL.canParse(fullUrl)) {
 		return new Response('Error: Invalid URL', { status: 400 });
