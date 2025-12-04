@@ -1,11 +1,6 @@
 ---
 // src/components/ShortenerForm.astro
-// Props can be added if this component needs to communicate upwards
-export interface Props {
-	onSuccess?: (data: string) => void;
-	onError?: (errorMessage: string) => void;
-}
-const { onSuccess, onError } = Astro.props;
+// Component now uses custom events instead of props
 ---
 <form id="shortenerForm">
 	<input type="text" name="slug" id="slug" placeholder="Custom slug (optional)" size="15">
@@ -43,7 +38,7 @@ const { onSuccess, onError } = Astro.props;
 	}
 </style>
 
-<script define:vars={{ onSuccessCallback: onSuccess, onErrorCallback: onError }}>
+<script>
 	// Vanilla JS alternative to jQuery for modern browsers
 	// const $ = (selector) => document.querySelector(selector);
 	// const $$ = (selector) => document.querySelectorAll(selector);
@@ -56,8 +51,10 @@ const { onSuccess, onError } = Astro.props;
 		const slug = $('#slug').val().trim();
 
 		if (!url) {
-			alert('URL is required.');
-			if (onErrorCallback) onErrorCallback('URL is required.');
+			const errorMessage = 'URL is required.';
+			alert(errorMessage);
+			// Dispatch custom event for error
+			window.dispatchEvent(new CustomEvent('shortener:error', { detail: errorMessage }));
 			return;
 		}
 
@@ -70,8 +67,10 @@ const { onSuccess, onError } = Astro.props;
 			// For now, let's assume we need a full URL to shorten.
 			// Or use URL.canParse more carefully for the intended use case
 			if (!URL.canParse(url) && !url.startsWith('/')) { // Very basic check
-				alert('Invalid URL format.');
-				if (onErrorCallback) onErrorCallback('Invalid URL format.');
+				const errorMessage = 'Invalid URL format.';
+				alert(errorMessage);
+				// Dispatch custom event for error
+				window.dispatchEvent(new CustomEvent('shortener:error', { detail: errorMessage }));
 				return;
 			}
 		}
@@ -83,19 +82,14 @@ const { onSuccess, onError } = Astro.props;
 			url: '/' + requestPath, // Assumes the API is at the root
 			type: 'GET', // Or POST if you change your worker
 			success: function(data) {
-				if (onSuccessCallback) {
-					onSuccessCallback(data);
-				} else {
-					// Fallback if no callback provided (though less ideal in component architecture)
-					console.log('Success (no callback):', data);
-				}
+				// Dispatch custom event for success
+				window.dispatchEvent(new CustomEvent('shortener:success', { detail: data }));
 			},
 			error: function(err) {
 				const errorMessage = err.responseText || 'An unknown error occurred.';
 				alert(errorMessage);
-				if (onErrorCallback) {
-					onErrorCallback(errorMessage);
-				}
+				// Dispatch custom event for error
+				window.dispatchEvent(new CustomEvent('shortener:error', { detail: errorMessage }));
 			}
 		});
 	}

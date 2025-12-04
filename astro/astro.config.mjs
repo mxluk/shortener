@@ -7,6 +7,19 @@ export default defineConfig({
 
 	// Vite specific configurations
 	vite: {
+		resolve: {
+			// Workaround for Vite tsconfig resolution bug
+			preserveSymlinks: true
+		},
+		build: {
+			rollupOptions: {
+				onwarn(warning, warn) {
+					// Suppress certain warnings
+					if (warning.code === 'UNRESOLVED_IMPORT') return;
+					warn(warning);
+				}
+			}
+		},
 		server: {
 			proxy: {
 				// Proxy API requests to your Cloudflare Worker dev server

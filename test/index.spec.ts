@@ -141,7 +141,8 @@ describe('fuc.moe shortener with in-memory KV', () => {
 		const response = await worker.fetch(makeRequest(`${slug}+${newUrl}`), env, ctx);
 		await waitOnExecutionContext(ctx);
 
-		expect(await response.text()).toBe(`URL ${existingUrl} already exists for hash ${slug}`);
+		expect(response.status).toBe(409);
+		expect(await response.text()).toBe(`Error: Slug '${slug}' is already in use for a different URL`);
 	});
 
 	it('returns same slug when custom slug exists with same URL', async () => {

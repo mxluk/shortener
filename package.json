@@ -3,9 +3,9 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"astro:dev": "astro dev --root ./astro",
-		"astro:build": "astro build --root ./astro",
-		"astro:preview": "astro preview --root ./astro",
+		"astro:dev": "cd astro && astro dev",
+		"astro:build": "cd astro && astro build",
+		"astro:preview": "cd astro && astro preview",
 		"worker:dev": "wrangler dev src/index.ts",
 		"worker:deploy": "wrangler deploy src/index.ts",
 		"dev": "npm-run-all --parallel astro:dev worker:dev",

@@ -36,7 +36,7 @@ async function handlePlusUrl(path: string, request: Request, env: Env): Promise<
 		if (value === fullUrl) {
 			return new Response(hash);
 		} else {
-			return new Response(`URL ${value} already exists for hash ${hash}`);
+			return new Response(`Error: Slug '${hash}' is already in use for a different URL`, { status: 409 });
 		}
 	}
 }
@@ -95,6 +95,7 @@ export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const fullURL = new URL(request.url);
 		// Extract path without leading slash: pathname + search + hash
+		// Note: pathname is already URL-decoded by the URL constructor
 		const fullPath = (fullURL.pathname + fullURL.search + fullURL.hash).slice(1);
 
 		// Check for custom slug pattern first (slug+url format)
