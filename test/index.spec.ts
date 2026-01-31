@@ -74,13 +74,13 @@ describe('fuc.moe shortener with in-memory KV', () => {
 		expect(await response.text()).toBe('Error: Invalid URL');
 	});
 
-	it('preserves query params and fragments in URL', async () => {
-		const url = 'https://example.com/page?foo=1#bar';
-		const expectedHash = 'rhFG'; // Whatever it hashes to
+        it('preserves query params and fragments in URL', async () => {
+                const url = 'https://example.com/page?foo=1#bar';
+                const expectedHash = 'rhFG'; // Deterministic hash from modified DJB2 algorithm (hashUrl)
 
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(makeRequest(url), env, ctx);
-		await waitOnExecutionContext(ctx);
+                const ctx = createExecutionContext();
+                const response = await worker.fetch(makeRequest(url), env, ctx);
+                await waitOnExecutionContext(ctx);
 
 		expect(await response.text()).toBe(expectedHash);
 	});
